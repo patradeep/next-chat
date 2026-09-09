@@ -62,9 +62,9 @@ A real-time 1-on-1 chat app built with Next.js (App Router, Tailwind CSS) and Ap
 
 ### 3. Attributes (Columns)
 Add the following attributes to the `messages` table:
-- `text` (String, size 1000, required)
+- `text` (Text, size 16,383, required)
 - `senderId` (String, size 255, required)
-- `senderName` (String, size 255, required)
+- `senderName` (String, size 100, required)
 - `recipientId` (String, size 255, required)
 - `read` (Boolean, default `false`, required)
 
