@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import type { CurrentUser, Message, RegisteredUser } from "@/types/chat";
 import { formatTime } from "@/lib/appwrite";
 
@@ -20,6 +21,29 @@ export function ChatSidebar({
   mobileShowChat,
   onSelectUser,
 }: ChatSidebarProps) {
+  const sortedUsers = useMemo(() => {
+    return [...users].sort((a, b) => {
+      const conversationA = messages.filter(
+        (m) =>
+          (m.senderId === a.$id && m.recipientId === currentUser?.$id) ||
+          (m.senderId === currentUser?.$id && m.recipientId === a.$id),
+      );
+      const lastMsgA = conversationA[conversationA.length - 1];
+
+      const conversationB = messages.filter(
+        (m) =>
+          (m.senderId === b.$id && m.recipientId === currentUser?.$id) ||
+          (m.senderId === currentUser?.$id && m.recipientId === b.$id),
+      );
+      const lastMsgB = conversationB[conversationB.length - 1];
+
+      const timeA = lastMsgA ? new Date(lastMsgA.$createdAt).getTime() : 0;
+      const timeB = lastMsgB ? new Date(lastMsgB.$createdAt).getTime() : 0;
+
+      return timeB - timeA;
+    });
+  }, [users, messages, currentUser]);
+
   return (
     <aside
       className={`w-full md:w-80 shrink-0 border-r border-slate-800 bg-slate-900/40 flex flex-col ${
@@ -27,19 +51,19 @@ export function ChatSidebar({
       }`}
     >
       <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between text-xs font-semibold text-slate-400 uppercase">
-        <span>Users ({users.length})</span>
+        <span>Users ({sortedUsers.length})</span>
         <span className="text-[10px] text-indigo-400 lowercase font-normal">
           select to chat
         </span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
-        {users.length === 0 ? (
+        {sortedUsers.length === 0 ? (
           <p className="p-4 text-center text-xs text-slate-500">
             No other users registered yet.
           </p>
         ) : (
-          users.map((u) => {
+          sortedUsers.map((u) => {
             const isSelected = activeRecipient?.$id === u.$id;
 
             // Simple calculation: count messages sent by this user to me that are unread
